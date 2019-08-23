@@ -23,12 +23,17 @@ Column {
     property real secondaryToolsHeight
     property bool secondaryToolsActive
     property bool findInPageActive
+    property real certOverlayHeight
+    property bool certOverlayActive
+    property real certOverlayAnimPos
     readonly property bool showFindButtons: webView.findInPageHasResult && findInPageActive
     property alias bookmarked: secondaryBar.bookmarked
     readonly property alias toolsHeight: toolsRow.height
 
     readonly property int horizontalOffset: largeScreen ? Theme.paddingLarge : Theme.paddingSmall
-    readonly property int iconWidth: largeScreen ? (Theme.iconSizeLarge + 3 * Theme.paddingMedium) : (Theme.iconSizeMedium + 2 * Theme.paddingMedium)
+    readonly property int buttonPadding: largeScreen || orientation === Orientation.Landscape || orientation === Orientation.LandscapeInverted ? Theme.paddingMedium : Theme.paddingSmall
+    readonly property int iconWidth: largeScreen ? (Theme.iconSizeLarge + 3 * buttonPadding) : (Theme.iconSizeMedium + 2 * buttonPadding)
+    readonly property int smallIconWidth: largeScreen ? (Theme.iconSizeMedium + 3 * buttonPadding) : (Theme.iconSizeSmall + 2 * buttonPadding)
     // Height of toolbar should be such that viewport height is
     // even number both chrome and fullscreen modes. For instance
     // height of 110px for toolbar would result 1px rounding
@@ -49,6 +54,7 @@ Column {
     signal showTabs
     signal showOverlay
     signal showSecondaryTools
+    signal showInfoOverlay
     signal showChrome
     signal closeActiveTab
 
@@ -74,6 +80,49 @@ Column {
         // Down allow hiding of toolbar when finding text from the page.
         if (findInPageActive && webView.contentItem) {
             webView.contentItem.forceChrome(true)
+        }
+    }
+
+    Item {
+        id: certOverlay
+        visible: opacity > 0.0 || height > 0.0
+        opacity: certOverlayActive ? 1.0 : 0.0
+        height: certOverlayHeight
+        width: parent.width
+
+        Behavior on opacity { FadeAnimation {} }
+
+        Rectangle {
+            visible: url.substring(0, 18) == "https://jolla.com/"
+            color: "transparent"
+            border.color: "green"
+            anchors.fill: parent
+        }
+
+        Loader {
+            active: webView.security
+            sourceComponent: CertInfo {
+                security: webView.security
+                animatePos: certOverlayAnimPos
+                width: certOverlay.width - Theme.horizontalPageMargin * 2
+                x: Theme.horizontalPageMargin
+                y: Theme.paddingLarge
+                height: certOverlayHeight
+            }
+        }
+
+        Browser.IconButton {
+            opacity: certOverlayAnimPos >= 1.0 ? 1.0 : 0.0
+            icon.source: "image://theme/icon-m-certificates"
+            active: true
+            onTapped: console.log("Security: cert info")
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+            }
+            width: toolBarRow.iconWidth + toolBarRow.horizontalOffset
+            icon.anchors.horizontalCenterOffset: -toolBarRow.horizontalOffset
+            height: toolsRow.height
         }
     }
 
@@ -162,13 +211,37 @@ Column {
             onTapped: webView.goBack()
         }
 
+        Browser.ExpandingButton {
+            id: padlockIcon
+            expandedWidth: toolBarRow.smallIconWidth
+            icon.source: "image://theme/icon-s-secure"
+            active: !toolBarRow.secondaryToolsActive && !findInPageActive
+            icon.color: (!webView.loading && webView.security)
+                        ? (webView.security.allGood ? "#ffffff" : "#ff0000")
+                        : "#999999"
+            enabled: webView.security
+            onTapped: certOverlayActive ? showChrome() : showInfoOverlay()
+
+            SequentialAnimation {
+                loops: Animation.Infinite
+                PropertyAnimation { target: padlockIcon.icon; property: "scale";
+                    to: 0.8; duration: 500; easing.type: Easing.OutCubic }
+                PropertyAnimation { target: padlockIcon.icon; property: "scale";
+                    to: 1.1; duration: 500; easing.type: Easing.OutElastic }
+                PropertyAnimation { target: padlockIcon.icon; property: "scale";
+                    to: 1.0; duration: 500; easing.type: Easing.InCubic }
+                running: webView.security && !webView.security.allGood && !webView.loading || url.substring(0, 18) == "https://jolla.com/"
+                alwaysRunToEnd: true
+            }
+        }
+
         MouseArea {
             id: touchArea
 
             readonly property bool down: pressed && containsMouse
 
             height: parent.height
-            width: toolBarRow.width - (tabButton.width + reloadButton.width + backIcon.width + menuButton.width)
+            width: toolBarRow.width - (tabButton.width + reloadButton.width + padlockIcon.width + backIcon.width + menuButton.width)
             enabled: !showFindButtons
 
             onClicked: {
@@ -177,6 +250,13 @@ Column {
                 } else {
                     toolBarRow.showOverlay()
                 }
+            }
+
+            Rectangle {
+                visible: url.substring(0, 18) == "https://jolla.com/"
+                color: "transparent"
+                border.color: "red"
+                anchors.fill: parent
             }
 
             Label {
@@ -253,7 +333,7 @@ Column {
 
             Browser.IconButton {
                 icon.source: "image://theme/icon-m-menu"
-                icon.anchors.horizontalCenterOffset: -toolBarRow.horizontalOffset
+                icon.anchors.horizontalCenterOffset: - toolBarRow.horizontalOffset
                 width: parent.width
                 opacity: secondaryToolsActive || findInPageActive ? 0.0 : 1.0
                 onTapped: showSecondaryTools()
@@ -270,7 +350,7 @@ Column {
 
             Browser.IconButton {
                 icon.source: "image://theme/icon-m-reset"
-                icon.anchors.horizontalCenterOffset: -toolBarRow.horizontalOffset
+                icon.anchors.horizontalCenterOffset: - toolBarRow.horizontalOffset
                 width: parent.width
                 opacity: !secondaryToolsActive && findInPageActive ? 1.0 : 0.0
                 onTapped: {

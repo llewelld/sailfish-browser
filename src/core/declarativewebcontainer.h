@@ -15,6 +15,7 @@
 #include "settingmanager.h"
 
 #include <qmozcontext.h>
+#include <qmozsecurity.h>
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLFunctions>
 #include <QPointer>
@@ -75,6 +76,8 @@ class DeclarativeWebContainer : public QWindow, public QQmlParserStatus, protect
 
     Q_PROPERTY(Qt::ScreenOrientation pendingWebContentOrientation READ pendingWebContentOrientation NOTIFY pendingWebContentOrientationChanged FINAL)
 
+    Q_PROPERTY(QMozSecurity *security READ security NOTIFY securityChanged)
+
 public:
     DeclarativeWebContainer(QWindow *parent = 0);
     ~DeclarativeWebContainer();
@@ -120,6 +123,8 @@ public:
     void setReadyToPaint(bool ready);
 
     Qt::ScreenOrientation pendingWebContentOrientation() const;
+
+    QMozSecurity *security() const;
 
     int tabId() const;
     QString title() const;
@@ -179,6 +184,7 @@ signals:
 
     void pendingWebContentOrientationChanged();
     void webContentOrientationChanged(Qt::ScreenOrientation orientation);
+    void securityChanged();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);

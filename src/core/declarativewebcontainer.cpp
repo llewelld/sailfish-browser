@@ -27,6 +27,7 @@
 #include <QOpenGLFunctions_ES2>
 #include <QGuiApplication>
 #include <qmozwindow.h>
+#include <qmozsecurity.h>
 
 #include <qpa/qplatformnativeinterface.h>
 
@@ -160,6 +161,8 @@ void DeclarativeWebContainer::setWebPage(DeclarativeWebPage *webPage, bool trigg
                     this, &DeclarativeWebContainer::updateLoadProgress, Qt::UniqueConnection);
             connect(m_webPage.data(), &DeclarativeWebPage::contentOrientationChanged,
                     this, &DeclarativeWebContainer::handleContentOrientationChanged, Qt::UniqueConnection);
+            connect(m_webPage.data(), &DeclarativeWebPage::securityChanged,
+                    this, &DeclarativeWebContainer::securityChanged, Qt::UniqueConnection);
 
             // NB: these signals are not disconnected upon setting current m_webPage.
             connect(m_webPage.data(), &DeclarativeWebPage::urlChanged,
@@ -186,6 +189,7 @@ void DeclarativeWebContainer::setWebPage(DeclarativeWebPage *webPage, bool trigg
         emit canGoForwardChanged();
         emit urlChanged();
         emit titleChanged();
+        emit securityChanged();
 
         setLoadProgress(m_webPage ? m_webPage->loadProgress() : 0);
     }
@@ -388,6 +392,11 @@ void DeclarativeWebContainer::setReadyToPaint(bool ready)
 Qt::ScreenOrientation DeclarativeWebContainer::pendingWebContentOrientation() const
 {
     return m_mozWindow ? m_mozWindow->pendingOrientation() : Qt::PortraitOrientation;
+}
+
+QMozSecurity *DeclarativeWebContainer::security() const
+{
+    return m_webPage ? m_webPage->security() : nullptr;
 }
 
 int DeclarativeWebContainer::tabId() const

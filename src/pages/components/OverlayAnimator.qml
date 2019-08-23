@@ -26,14 +26,17 @@ Item {
     readonly property bool allowContentUse: state === _chromeVisible || state === _fullscreenWebPage || state === _doubleToolBar
     readonly property bool dragging: state === _draggingOverlay
     readonly property bool secondaryTools: state === _doubleToolBar
+    readonly property bool certOverlay: state === _certOverlay
 
     property bool _immediate
+    property bool _midPos
 
     readonly property string _fullscreenOverlay: "fullscreenOverlay"
     readonly property string _doubleToolBar: "doubleToolBar"
     readonly property string _chromeVisible: "chromeVisible"
     readonly property string _fullscreenWebPage: "fullscreenWebPage"
     readonly property string _draggingOverlay: "draggingOverlay"
+    readonly property string _certOverlay: "certOverlay"
     readonly property string _noOverlay: "noOverlay"
 
     function showSecondaryTools() {
@@ -46,6 +49,10 @@ Item {
 
     function showOverlay(immediate) {
         updateState(_fullscreenOverlay, immediate || false)
+    }
+
+    function showInfoOverlay(immediate) {
+        updateState(_certOverlay, immediate || false)
     }
 
     function drag() {
@@ -62,6 +69,9 @@ Item {
         if (newState !== _fullscreenWebPage) {
             overlay.visible = true
         }
+        if (state === _certOverlay && newState !== _midPos) {
+            _midPos = true
+        }
 
         state = newState
     }
@@ -69,15 +79,17 @@ Item {
     state: _chromeVisible
     onStateChanged: {
         // Animation end changes to true state. Hence not like atTop = state !== _fullscreenOverlay
-        var wasAtMiddle = !atBottom && !atTop
+        var wasAtMiddle = (!atBottom && !atTop) || _midPos
         var goingUp = (atBottom || wasAtMiddle) && state === _fullscreenOverlay
-        var goingDown = (atTop || wasAtMiddle) && (state === _chromeVisible || state === _fullscreenWebPage || state === _doubleToolBar || state === _noOverlay || state == _draggingOverlay)
+        var goingDown = (atTop || wasAtMiddle) && (state === _chromeVisible || state === _fullscreenWebPage || state === _doubleToolBar || state === _noOverlay || state === _draggingOverlay || state === _certOverlay)
 
-        if (state !== _fullscreenOverlay) {
+        if ((state !== _fullscreenOverlay && state !== _certOverlay) || _midPos) {
             atTop = false
-        } if (state !== _chromeVisible && state !== _fullscreenWebPage && state !== _doubleToolBar) {
+        }
+        if ((state !== _chromeVisible && state !== _fullscreenWebPage && state !== _doubleToolBar) || _midPos) {
             atBottom = false
         }
+        _midPos = false
 
         direction = goingUp ? "upwards" : (goingDown ? "downwards" : "")
     }
@@ -137,7 +149,7 @@ Item {
             changes: [
                 PropertyChanges {
                     target: overlay
-                    y: openYPosition
+                    y: _fullHeight
                 }
             ]
         },
@@ -154,13 +166,23 @@ Item {
                     secondaryToolsHeight: overlay.toolBar.toolsHeight
                 }
             ]
+        },
+
+        State {
+            name: _certOverlay
+            changes: [
+                PropertyChanges {
+                    target: overlay
+                    y: _infoHeight
+                }
+            ]
         }
     ]
 
     transitions: [
         Transition {
             id: overlayTransition
-            to: "fullscreenWebPage,chromeVisible,loadProgressOverlay,fullscreenOverlay,noOverlay,doubleToolBar"
+            to: "fullscreenWebPage,chromeVisible,loadProgressOverlay,fullscreenOverlay,noOverlay,doubleToolBar,certOverlay"
 
             SequentialAnimation {
                 NumberAnimation { target: webView; property: "height"; duration: transitionDuration; easing.type: Easing.InOutQuad }
@@ -168,7 +190,7 @@ Item {
                     script: {
                         if (animator.state === _chromeVisible || animator.state === _fullscreenWebPage || animator.state === _doubleToolBar) {
                             atBottom = true
-                        } else if (animator.state === _fullscreenOverlay) {
+                        } else if (animator.state === _fullscreenOverlay || animator.state === _certOverlay) {
                             atTop = true
                         }
 
@@ -186,7 +208,7 @@ Item {
                 }
             }
             NumberAnimation { target: overlay; property: "y"; duration: transitionDuration; easing.type: Easing.InOutQuad }
-            NumberAnimation { target: overlay.toolBar; property: "secondaryToolsHeight"; duration: transitionDuration; easing.type: Easing.InOutQuad }
+            NumberAnimation { target: overlay.toolBar; property: "secondaryToolsHeight"; duration: transitionDuration; easing.type: Easing.InOutQuad }        
         }
         ,
         Transition {

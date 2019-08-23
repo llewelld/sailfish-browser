@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2015 Jolla Ltd.
-** Contact: Raine Makelainen <raine.makelainen@jolla.com>
+** Contact: Piotr Tworek <piotr.tworek@jolla.com>
 **
 ****************************************************************************/
 
@@ -9,31 +9,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef DECLARATIVEWEBCONTAINER_H
-#define DECLARATIVEWEBCONTAINER_H
+#ifndef qmozsecurity_h
+#define qmozsecurity_h
 
 #include <QObject>
-#include <qmozsecurity.h>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-class DeclarativeWebPage;
-
-class DeclarativeWebContainer : public QObject
+class QMozSecurity : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit DeclarativeWebContainer(QObject *parent = 0);
+    explicit QMozSecurity(QObject *parent = 0) : QObject(parent) {
+    }
 
-    int findParentTabId(int) const;
-    MOCK_CONST_METHOD0(webPage, DeclarativeWebPage*());
-    MOCK_CONST_METHOD0(privateMode, bool());
-
-signals:
-    void portraitChanged();
 };
 
+#endif /* qmozsecurity_h */
 
-#endif

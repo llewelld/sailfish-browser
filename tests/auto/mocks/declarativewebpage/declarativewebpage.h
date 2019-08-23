@@ -27,6 +27,7 @@
 #include "tab.h"
 
 class DeclarativeWebContainer;
+class QMozSecurity;
 
 class DeclarativeWebPage : public QObject
 {
@@ -94,6 +95,10 @@ public:
 
     MOCK_METHOD2(Q_INVOKABLE loadTab, void(QString newUrl, bool force));
 
+    MOCK_CONST_METHOD0(securityState, uint());
+    MOCK_CONST_METHOD0(securityStatus, QString());
+    MOCK_CONST_METHOD0(security, QMozSecurity *());
+
 signals:
     void canGoBackChanged();
     void canGoForwardChanged();
@@ -109,6 +114,7 @@ signals:
     void tabIdChanged();
     void urlChanged();
     void titleChanged();
+    void securityChanged(QString status, uint state);
     void forcedChromeChanged();
     void fullscreenChanged();
     void domContentLoadedChanged();
