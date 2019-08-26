@@ -57,6 +57,7 @@ Column {
     signal showInfoOverlay
     signal showChrome
     signal closeActiveTab
+    signal showCertDetail
 
     // Used from SecondaryBar
     signal enterNewTabUrl
@@ -112,10 +113,11 @@ Column {
         }
 
         Browser.IconButton {
-            opacity: certOverlayAnimPos >= 1.0 ? 1.0 : 0.0
+            opacity: (webView.security && !webView.security.certIsNull
+                      && certOverlayAnimPos >= 1.0) ? 1.0 : 0.0
             icon.source: "image://theme/icon-m-certificates"
             active: true
-            onTapped: console.log("Security: cert info")
+            onTapped: showCertDetail()
             anchors {
                 right: parent.right
                 bottom: parent.bottom

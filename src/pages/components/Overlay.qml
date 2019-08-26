@@ -14,6 +14,7 @@ import QtQuick.Window 2.2 as QuickWindow
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Browser 1.0
+import com.jolla.settings.system 1.0
 import "." as Browser
 
 Background {
@@ -497,6 +498,12 @@ Background {
                 }
                 onBookmarkActivePage: favoriteGrid.fetchAndSaveBookmark()
                 onRemoveActivePageFromBookmarks: bookmarkModel.remove(webView.url)
+
+                onShowCertDetail: {
+                    if (webView.security && !webView.security.certIsNull) {
+                        pageStack.animatorPush("com.jolla.settings.system.CertificateDetailsPage", {"title": "Test cert page", "details": webView.security.serverCertDetails})
+                    }
+                }
             }
 
             Browser.HistoryList {
