@@ -101,10 +101,6 @@ DeclarativeWebPage::DeclarativeWebPage(QObject *parent)
         qCDebug(lcCoreLog) << "WebPage: fullscreenHeightChanged";
         updateViewMargins();
     });
-
-    connect(this, &QOpenGLWebPage::securityChanged, &m_security, &QMozSecurity::setSecurity);
-
-    connect(&m_security, &QMozSecurity::securityChanged, this, &DeclarativeWebPage::securityChanged);
 }
 
 DeclarativeWebPage::~DeclarativeWebPage()
@@ -495,11 +491,6 @@ bool DeclarativeWebPage::fullscreen() const
 bool DeclarativeWebPage::forcedChrome() const
 {
     return m_forcedChrome;
-}
-
-QMozSecurity *DeclarativeWebPage::security()
-{
-    return &m_security;
 }
 
 void DeclarativeWebPage::setFullscreen(const bool fullscreen)

@@ -33,11 +33,4 @@ IconButton {
     }
 
     Behavior on opacity { FadeAnimation {} }
-
-    Rectangle {
-        visible: url.substring(0, 18) == "https://jolla.com/"
-        color: "transparent"
-        border.color: "red"
-        anchors.fill: parent
-    }
 }

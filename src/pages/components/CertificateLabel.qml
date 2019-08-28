@@ -21,13 +21,14 @@ Item {
     readonly property real _valueWidth: width - tabPos - valueLabel.anchors.leftMargin
     visible: value && value.length > 0
     height: Math.max(keyLabel.height, valueLabel.height)
-    width: parent.width
+    width: parent.width - 2 * Theme.horizontalPageMargin
+    x: Theme.horizontalPageMargin
 
     Label {
         id: keyLabel
         width: tabPos
         wrapMode: Text.Wrap
-        color: Theme.secondaryColor
+        color: Theme.highlightColor
     }
     Label {
         id: valueLabel
@@ -38,6 +39,7 @@ Item {
             leftMargin: tabPos > 0 ? Theme.paddingSmall : 0
         }
         wrapMode: Text.Wrap
-        color: danger ? "#ff2222" : happy ? "#22ff22" : Theme.primaryColor
+        color: danger ? Theme.errorColor : happy ? (palette.colorScheme === Theme.LightOnDark ? "#22ff22" : "#007700") : Theme.secondaryHighlightColor
+        opacity: danger ? Theme.opacityHigh : 1.0
     }
 }

@@ -20,7 +20,7 @@ Item {
     property bool portrait
     property bool atTop
     property bool atBottom: true
-    property int transitionDuration: !_immediate ? 400 : 0
+    property int transitionDuration: !_immediate ? (state === _certOverlay ? 300 : 400) : 0
     property real openYPosition: portrait ? overlay.toolBar.toolsHeight : 0
 
     readonly property bool allowContentUse: state === _chromeVisible || state === _fullscreenWebPage || state === _doubleToolBar

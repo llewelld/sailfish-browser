@@ -39,7 +39,6 @@ class DeclarativeWebPage : public QOpenGLWebPage {
     Q_PROPERTY(qreal fullscreenHeight MEMBER m_fullScreenHeight NOTIFY fullscreenHeightChanged FINAL)
     Q_PROPERTY(qreal toolbarHeight READ toolbarHeight WRITE setToolbarHeight NOTIFY toolbarHeightChanged FINAL)
     Q_PROPERTY(qreal virtualKeyboardMargin WRITE setVirtualKeyboardMargin READ virtualKeyboardMargin NOTIFY virtualKeyboardMarginChanged FINAL)
-    Q_PROPERTY(QMozSecurity *security READ security NOTIFY securityChanged)
 
 public:
     DeclarativeWebPage(QObject *parent = 0);
@@ -68,8 +67,6 @@ public:
     void setInitialLoadHasHappened();
 
     void timerEvent(QTimerEvent *);
-
-    QMozSecurity *security();
 
     Q_INVOKABLE void loadTab(QString newUrl, bool force);
     Q_INVOKABLE void grabToFile(const QSize& size);

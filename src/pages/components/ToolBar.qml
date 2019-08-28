@@ -93,38 +93,17 @@ Column {
 
         Behavior on opacity { FadeAnimation {} }
 
-        Rectangle {
-            visible: url.substring(0, 18) == "https://jolla.com/"
-            color: "transparent"
-            border.color: "green"
-            anchors.fill: parent
-        }
-
         Loader {
-            active: webView.security
-            sourceComponent: CertInfo {
+            active: certOverlay.visible && webView.security
+            sourceComponent: CertificateInfo {
                 security: webView.security
-                animatePos: certOverlayAnimPos
-                width: certOverlay.width - Theme.horizontalPageMargin * 2
-                x: Theme.horizontalPageMargin
-                y: Theme.paddingLarge
+                width: certOverlay.width
                 height: certOverlayHeight
-            }
-        }
+                buttonHeight: toolsRow.height
+                opacity: Math.max((certOverlayAnimPos * 2.0) - 1.0, 0)
 
-        Browser.IconButton {
-            opacity: (webView.security && !webView.security.certIsNull
-                      && certOverlayAnimPos >= 1.0) ? 1.0 : 0.0
-            icon.source: "image://theme/icon-m-certificates"
-            active: true
-            onTapped: showCertDetail()
-            anchors {
-                right: parent.right
-                bottom: parent.bottom
+                onShowCertDetail: toolBarRow.showCertDetail()
             }
-            width: toolBarRow.iconWidth + toolBarRow.horizontalOffset
-            icon.anchors.horizontalCenterOffset: -toolBarRow.horizontalOffset
-            height: toolsRow.height
         }
     }
 
@@ -218,9 +197,9 @@ Column {
             expandedWidth: toolBarRow.smallIconWidth
             icon.source: "image://theme/icon-s-secure"
             active: !toolBarRow.secondaryToolsActive && !findInPageActive
-            icon.color: (!webView.loading && webView.security)
-                        ? (webView.security.allGood ? "#ffffff" : "#ff0000")
-                        : "#999999"
+            icon.color: (webView.security && webView.security.validState)
+                        ? (webView.security.allGood ? Theme.primaryColor : Theme.errorColor)
+                        : Theme.primaryColor
             enabled: webView.security
             onTapped: certOverlayActive ? showChrome() : showInfoOverlay()
 
@@ -232,7 +211,7 @@ Column {
                     to: 1.1; duration: 500; easing.type: Easing.OutElastic }
                 PropertyAnimation { target: padlockIcon.icon; property: "scale";
                     to: 1.0; duration: 500; easing.type: Easing.InCubic }
-                running: webView.security && !webView.security.allGood && !webView.loading || url.substring(0, 18) == "https://jolla.com/"
+                running: webView.security && webView.security.validState && !webView.security.allGood
                 alwaysRunToEnd: true
             }
         }
@@ -252,13 +231,6 @@ Column {
                 } else {
                     toolBarRow.showOverlay()
                 }
-            }
-
-            Rectangle {
-                visible: url.substring(0, 18) == "https://jolla.com/"
-                color: "transparent"
-                border.color: "red"
-                anchors.fill: parent
             }
 
             Label {
