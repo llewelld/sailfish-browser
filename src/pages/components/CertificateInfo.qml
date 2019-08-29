@@ -20,9 +20,11 @@ SilicaFlickable {
     property QMozSecurity security
     readonly property bool _validCert: security && security.subjectDisplayName.length > 0
     visible: security
-    contentHeight: Math.max(certInfoColumn.height + Theme.paddingMedium + showMoreSpacing.height, height)
+    contentHeight: certInfoColumn.height + 2 * Theme.paddingMedium
     clip: contentHeight > height
     property real buttonHeight: Theme.itemSizeExtraSmall
+    property real maxHeight
+    height: Math.min(maxHeight, contentHeight)
 
     signal showCertDetail
 
@@ -157,31 +159,37 @@ SilicaFlickable {
             }
             danger: security && security.loadedTrackingContent
         }
-    }
 
-    Item {
-        id: showMoreSpacing
-        width: parent.width
-        visible: security && !security.certIsNull
-        height: visible ? buttonHeight : 0
-        anchors.bottom: parent.bottom
+        Item {
+            id: showMoreSpacing
+            width: parent.width
+            visible: security && !security.certIsNull
+            height: visible ? buttonHeight : (Theme.itemSizeExtraSmall - showMoreButton) / 2.0
 
-        BackgroundItem {
-            id: showMore
-            height: Theme.itemSizeExtraSmall
-            anchors.verticalCenter: parent.verticalCenter
+            BackgroundItem {
+                id: showMore
+                height: Theme.itemSizeExtraSmall
+                anchors.verticalCenter: parent.verticalCenter
 
-            onClicked: {
-                console.log("Security: more")
-                showCertDetail()
+                onClicked: {
+                    console.log("Security: more")
+                    showCertDetail()
+                }
+
+                Private.ShowMoreButton {
+                    id: showMoreButton
+                    x: Theme.horizontalPageMargin
+                    y: showMore.height/2 - height/2
+                    highlighted: showMore.highlighted
+                    enabled: false
+                }
             }
+        }
 
-            Private.ShowMoreButton {
-                x: Theme.horizontalPageMargin
-                y: showMore.height/2 - height/2
-                highlighted: showMore.highlighted
-                enabled: false
-            }
+        Item {
+            visible: !showMoreSpacing.visible
+            width: parent.width
+            height: ((buttonHeight - Theme.itemSizeExtraSmall) / 2.0) - Theme.paddingSmall
         }
     }
 }

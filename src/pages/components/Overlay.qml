@@ -114,7 +114,8 @@ Background {
         openYPosition: _overlayHeight
 
         readonly property real _fullHeight: isPortrait ? overlay.toolBar.toolsHeight : 0
-        readonly property real _infoHeight: isPortrait ? overlay.toolBar.toolsHeight * 4 : overlay.toolBar.toolsHeight
+        //readonly property real _infoHeight: isPortrait ? overlay.toolBar.toolsHeight * 4 : overlay.toolBar.toolsHeight
+        readonly property real _infoHeight: webView.fullscreenHeight - overlay.toolBar.toolsHeight - overlay.toolBar.certOverlayMaxHeight
 
         onAtBottomChanged: {
             if (atBottom) {

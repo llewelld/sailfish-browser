@@ -26,6 +26,7 @@ Column {
     property real certOverlayHeight
     property bool certOverlayActive
     property real certOverlayAnimPos
+    readonly property real certOverlayMaxHeight: certInfo.contentHeight
     readonly property bool showFindButtons: webView.findInPageHasResult && findInPageActive
     property alias bookmarked: secondaryBar.bookmarked
     readonly property alias toolsHeight: toolsRow.height
@@ -86,24 +87,22 @@ Column {
 
     Item {
         id: certOverlay
-        visible: opacity > 0.0 || height > 0.0
         opacity: certOverlayActive ? 1.0 : 0.0
         height: certOverlayHeight
         width: parent.width
 
         Behavior on opacity { FadeAnimation {} }
 
-        Loader {
-            active: certOverlay.visible && webView.security
-            sourceComponent: CertificateInfo {
-                security: webView.security
-                width: certOverlay.width
-                height: certOverlayHeight
-                buttonHeight: toolsRow.height
-                opacity: Math.max((certOverlayAnimPos * 2.0) - 1.0, 0)
+        CertificateInfo {
+            id: certInfo
+            visible: webView.security
+            security: webView.security
+            width: certOverlay.width
+            maxHeight: certOverlayHeight
+            buttonHeight: toolsRow.height
+            opacity: Math.max((certOverlayAnimPos * 2.0) - 1.0, 0)
 
-                onShowCertDetail: toolBarRow.showCertDetail()
-            }
+            onShowCertDetail: toolBarRow.showCertDetail()
         }
     }
 
